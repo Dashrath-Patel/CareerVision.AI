@@ -8,6 +8,34 @@ const model = genAI.getGenerativeModel({
   model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' 
 });
 
+// Utility function to clean and parse JSON from AI responses
+function cleanAndParseJSON(response: string): any {
+  let jsonString = response.trim();
+  
+  // Remove any surrounding text/explanations
+  const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    jsonString = jsonMatch[0];
+  }
+  
+  // Extract from code blocks if present
+  const codeBlockMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch) {
+    jsonString = codeBlockMatch[1];
+  }
+  
+  // Clean up common JSON formatting issues
+  jsonString = jsonString
+    .replace(/\/\/.*$/gm, '') // Remove line comments
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+    .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+    .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // Add quotes to unquoted keys
+    .replace(/:\s*'([^']*)'/g, ': "$1"') // Convert single quotes to double quotes
+    .trim();
+  
+  return JSON.parse(jsonString);
+}
+
 export interface UserProfile {
   selectedDomain: string;
   skillLevel: 'beginner' | 'intermediate' | 'advanced';
@@ -455,12 +483,7 @@ Return ONLY valid JSON in this format:
 
     try {
       const response = await this.callGemini(prompt);
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Invalid roadmap response format');
-      }
-      
-      return JSON.parse(jsonMatch[0]);
+      return cleanAndParseJSON(response);
     } catch (error) {
       console.error('Error generating roadmap:', error);
       throw new Error('Failed to generate career roadmap');
@@ -472,7 +495,14 @@ Return ONLY valid JSON in this format:
     assessmentResult: AssessmentResult
   ): Promise<GamifiedRoadmap> {
     const prompt = `
-You are an expert career strategist and gamification designer. Create a comprehensive, gamified career roadmap for:
+You are an expert career strategist and gamification designer. Create a comprehensive, gamified career roadmap.
+
+CRITICAL INSTRUCTIONS:
+1. Return ONLY valid JSON - no comments, no explanations, no extra text
+2. Do not include // comments or /* */ comments in the JSON
+3. Use proper JSON syntax with double quotes for all strings
+4. Do not include trailing commas
+5. The response must start with { and end with }
 
 User Profile:
 - Domain: ${userProfile.selectedDomain}
@@ -588,23 +618,66 @@ Return ONLY a valid JSON object in this exact format:
   ]
 }
 
-Make the roadmap engaging, achievable, and tailored to their specific background and goals.
+REMEMBER: Return ONLY the JSON object above. No additional text, no comments, no explanations. The response must be valid JSON that can be parsed directly.
 `;
 
     try {
       const response = await this.callGemini(prompt);
       
-      // Clean the response to extract JSON
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Invalid AI response format');
+      // Use the utility function to clean and parse JSON
+      const roadmap = cleanAndParseJSON(response);
+      
+      // Validate the structure
+      if (!roadmap.milestones || !Array.isArray(roadmap.milestones)) {
+        throw new Error('Invalid roadmap structure: missing milestones array');
       }
       
-      const roadmap = JSON.parse(jsonMatch[0]);
       return roadmap;
     } catch (error) {
       console.error('Error generating gamified roadmap:', error);
-      throw new Error('Failed to generate gamified roadmap');
+      
+      // Try alternative parsing approaches
+      try {
+        const fallbackResponse = await this.callGemini(prompt);
+        console.error('Attempting fallback parsing for response:', fallbackResponse);
+        
+        // Try to extract just the core structure
+        const simplifiedMatch = fallbackResponse.match(/"milestones"\s*:\s*\[([\s\S]*?)\]/);
+        if (simplifiedMatch) {
+          const basicRoadmap: GamifiedRoadmap = {
+            domain: userProfile.selectedDomain,
+            currentLevel: userProfile.skillLevel,
+            targetLevel: 'expert',
+            totalEstimatedHours: 240,
+            totalEstimatedWeeks: 24,
+            difficultyLevel: userProfile.skillLevel,
+            milestones: [],
+            allBadges: [],
+            skillProgression: [],
+            motivationalQuotes: ['Keep learning and growing!'],
+            dailyGoals: [],
+            weeklyGoals: [],
+            personalizedTips: ['Focus on consistent daily practice'],
+            careerProjections: []
+          };
+          
+          try {
+            const milestonesJson = `[${simplifiedMatch[1]}]`;
+            const cleaned = milestonesJson
+              .replace(/\/\/.*$/gm, '')
+              .replace(/\/\*[\s\S]*?\*\//g, '')
+              .replace(/,(\s*[}\]])/g, '$1');
+            basicRoadmap.milestones = JSON.parse(cleaned);
+            return basicRoadmap;
+          } catch (milestoneError) {
+            console.error('Failed to parse milestones:', milestoneError);
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fallback generation also failed:', fallbackError);
+      }
+      
+      throw new Error('Failed to generate gamified roadmap: Invalid JSON format from AI response');
     }
   }
 
