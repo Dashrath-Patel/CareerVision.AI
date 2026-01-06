@@ -22,10 +22,10 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(RoadmapStage)
 class RoadmapStageAdmin(admin.ModelAdmin):
-    list_display = ('stage_id', 'domain', 'title', 'difficulty', 'points', 'order', 'is_active')
-    list_filter = ('domain', 'difficulty', 'is_active')
+    list_display = ('stage_id', 'domain', 'title', 'difficulty', 'points', 'order')
+    list_filter = ('domain', 'difficulty')
     search_fields = ('stage_id', 'title', 'domain')
-    list_editable = ('is_active', 'order')
+    list_editable = ('order',)
     ordering = ('domain', 'order')
 
 
@@ -34,7 +34,7 @@ class UserStageProgressAdmin(admin.ModelAdmin):
     list_display = ('user_profile', 'stage', 'progress', 'completed', 'completed_at')
     list_filter = ('completed', 'stage__domain', 'stage__difficulty')
     search_fields = ('user_profile__user_id', 'stage__title')
-    readonly_fields = ('started_at', 'updated_at')
+    readonly_fields = ('created_at',)
 
 
 @admin.register(Badge)
@@ -53,26 +53,24 @@ class UserBadgeAdmin(admin.ModelAdmin):
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('achievement_id', 'name', 'category', 'points', 'max_progress', 'is_active')
-    list_filter = ('category', 'is_active', 'created_at')
+    list_display = ('achievement_id', 'name', 'achievement_type', 'points', 'target')
+    list_filter = ('achievement_type', 'created_at')
     search_fields = ('achievement_id', 'name')
-    list_editable = ('is_active',)
 
 
 @admin.register(UserAchievement)
 class UserAchievementAdmin(admin.ModelAdmin):
-    list_display = ('user_profile', 'achievement', 'progress', 'completed', 'completed_at')
-    list_filter = ('completed', 'achievement__category')
+    list_display = ('user_profile', 'achievement', 'current_progress', 'completed', 'completed_at')
+    list_filter = ('completed', 'achievement__achievement_type')
     search_fields = ('user_profile__user_id', 'achievement__name')
-    readonly_fields = ('started_at', 'updated_at')
+    readonly_fields = ('created_at',)
 
 
 @admin.register(DailyChallenge)
 class DailyChallengeAdmin(admin.ModelAdmin):
-    list_display = ('challenge_id', 'title', 'challenge_type', 'points', 'expires_at', 'is_active')
-    list_filter = ('challenge_type', 'is_active', 'created_at')
+    list_display = ('challenge_id', 'title', 'challenge_type', 'points', 'expires_at')
+    list_filter = ('challenge_type', 'created_at')
     search_fields = ('challenge_id', 'title')
-    list_editable = ('is_active',)
 
 
 @admin.register(UserChallengeProgress)
@@ -84,10 +82,9 @@ class UserChallengeProgressAdmin(admin.ModelAdmin):
 
 @admin.register(WeeklyQuest)
 class WeeklyQuestAdmin(admin.ModelAdmin):
-    list_display = ('quest_id', 'title', 'total_points', 'starts_at', 'ends_at', 'is_active')
-    list_filter = ('is_active', 'starts_at')
+    list_display = ('quest_id', 'title', 'total_points', 'starts_at', 'ends_at')
+    list_filter = ('starts_at',)
     search_fields = ('quest_id', 'title')
-    list_editable = ('is_active',)
 
 
 @admin.register(UserQuestProgress)
@@ -95,7 +92,7 @@ class UserQuestProgressAdmin(admin.ModelAdmin):
     list_display = ('user_profile', 'quest', 'progress', 'completed', 'completed_at')
     list_filter = ('completed', 'quest__starts_at')
     search_fields = ('user_profile__user_id', 'quest__title')
-    readonly_fields = ('started_at', 'updated_at')
+    readonly_fields = ('created_at',)
 
 
 @admin.register(SkillMastery)

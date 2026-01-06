@@ -420,7 +420,13 @@ export class ResourceRecommendationService {
   } {
     const skillDependencies = this.getSkillDependencies();
     const sortedSkills = this.topologicalSort(targetSkills, skillDependencies);
-    const sequence = [];
+    const sequence: Array<{
+      week: number;
+      skill: string;
+      resources: LearningResource[];
+      estimatedHours: number;
+      prerequisites: string[];
+    }> = [];
     let currentWeek = 1;
 
     sortedSkills.forEach(skill => {

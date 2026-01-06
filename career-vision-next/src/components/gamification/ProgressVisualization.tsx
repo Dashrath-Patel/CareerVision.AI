@@ -7,7 +7,8 @@ import {
   LineChart, Line, Area, AreaChart, PieChart, Pie, Cell, RadialBarChart, RadialBar
 } from 'recharts';
 import { Calendar, TrendingUp, Clock, Target, Zap, Award } from 'lucide-react';
-import { ProgressStats, UserProgress } from '@/services/progress-tracking-service';
+import { ProgressStats } from '@/types/gamification';
+import { UserProgress } from '@/services/progress-tracking-service';
 
 interface ProgressVisualizationProps {
   stats: ProgressStats;
@@ -30,15 +31,17 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
     { week: 'Week 6', stages: 5, hours: 18 },
   ];
 
-  const skillProgressData = stats.skillDistribution.map(skill => ({
+  // Prepare chart data
+  const skillProgressData = stats.skill_distribution.map((skill: any) => ({
     name: skill.skill,
-    progress: skill.percentage,
-    level: userProgress.skillMasteries.find(s => s.skill === skill.skill)?.level || 'beginner'
+    progress: skill.progress,
+    level: skill.level,
+    percentage: skill.percentage
   }));
 
-  const timeDistributionData = stats.productiveHours.map(hour => ({
+  const timeDistributionData = stats.productive_hours.map((hour: any) => ({
     hour: hour.hour,
-    sessions: hour.count,
+    activities: hour.count,
     label: `${hour.hour}:00`
   }));
 
@@ -101,10 +104,10 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             <span className="text-xs text-gray-500 dark:text-gray-400">Time Spent</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            {stats.totalTimeSpent}h
+            {stats.total_time_spent}h
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            Avg: {Math.round(stats.averageSessionTime)}h per session
+            Avg: {Math.round(stats.average_session_time)}h per session
           </div>
         </motion.div>
 
@@ -119,7 +122,7 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             <span className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            {Math.round(stats.completionRate)}%
+            {Math.round(stats.completion_rate)}%
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {userProgress.completedStages.length} stages completed
@@ -137,7 +140,7 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             <span className="text-xs text-gray-500 dark:text-gray-400">Weekly Goal</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            {Math.round(stats.weeklyGoalProgress)}%
+            {Math.round(stats.weekly_goal_progress)}%
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {userProgress.weeklyGoals.current}/{userProgress.weeklyGoals.target} this week
@@ -155,7 +158,7 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
             <span className="text-xs text-gray-500 dark:text-gray-400">Active Days</span>
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            {stats.activeDays}
+            {stats.active_days}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             Current streak: {userProgress.streak.currentStreak}
@@ -207,12 +210,12 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }: any) => `${name} ${((percent as number) * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="progress"
               >
-                {skillProgressData.map((entry, index) => (
+                {skillProgressData.map((entry: any, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

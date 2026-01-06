@@ -1,6 +1,9 @@
 import { UserProgress, CareerRoadmap, RoadmapStage, Achievement, Badge } from '@/types/gamification';
 import { GamificationService } from './gamification-service';
 
+// Re-export UserProgress for components
+export type { UserProgress };
+
 export interface ProgressUpdate {
   type: 'stage_completed' | 'stage_progress' | 'skill_practiced' | 'resource_completed' | 'daily_activity';
   stageId?: string;
@@ -159,7 +162,8 @@ export class ProgressTrackingService {
     const previousLevel = updatedProgress.currentLevel.level;
     updatedProgress.totalPoints += pointsEarned;
     updatedProgress.currentLevel = GamificationService.calculateUserLevel(updatedProgress.totalPoints);
-    updatedProgress.nextLevel = GamificationService.getNextLevel(updatedProgress.currentLevel.level);
+    const nextLevel = GamificationService.getNextLevel(updatedProgress.currentLevel.level);
+    updatedProgress.nextLevel = nextLevel || undefined;
 
     // Check for level up
     levelUp = updatedProgress.currentLevel.level > previousLevel;

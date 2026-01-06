@@ -21,10 +21,10 @@ interface Domain {
 }
 
 interface UserProfile {
-  selectedDomain: string;
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  domain: string;
   educationLevel: string;
   experience: string;
+  skillLevel: string;
   interests: string[];
   goals: string[];
 }
@@ -131,7 +131,7 @@ export default function DomainSelection({ onDomainSelected }: DomainSelectionPro
 
   const handleProfileComplete = (profileData: Partial<UserProfile>) => {
     const completeProfile: UserProfile = {
-      selectedDomain,
+      domain: selectedDomain,
       skillLevel: profileData.skillLevel || 'beginner',
       educationLevel: profileData.educationLevel || '',
       experience: profileData.experience || '',
@@ -416,10 +416,10 @@ function ProfileForm({ domain, onComplete, onBack }: ProfileFormProps) {
             ))}
           </select>
         </div>
-
+        
         <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6 border border-neutral-200 dark:border-neutral-800">
           <label className="block text-sm font-medium text-neutral-800 dark:text-white mb-3">
-            Experience
+            Experience Level
           </label>
           <select
             value={formData.experience}

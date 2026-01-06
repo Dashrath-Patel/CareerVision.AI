@@ -198,3 +198,52 @@ export interface WeeklyQuest {
     unlocks?: string[];
   };
 }
+
+// Additional types for Django API integration
+export interface UserProfile {
+  user_id: string;
+  domain: string;
+  total_points: number;
+  current_level: number;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProgressStats {
+  total_time_spent: number;
+  completion_rate: number;
+  average_session_time: number;
+  weekly_goal_progress: number;
+  monthly_goal_progress: number;
+  last_activity_date: string;
+  active_days: number;
+  productive_hours: Array<{ hour: number; count: number }>;
+  skill_distribution: Array<{
+    skill: string;
+    percentage: number;
+    level: string;
+    progress: number;
+  }>;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  user_id: string;
+  total_points: number;
+  level: number;
+  domain: string;
+  badges_count: number;
+  current_streak: number;
+}
+
+export interface ProgressUpdateResponse {
+  points_earned: number;
+  total_points: number;
+  level_up: boolean;
+  new_level: number;
+  new_badges: Badge[];
+  current_streak: number;
+}

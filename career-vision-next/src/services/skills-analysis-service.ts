@@ -266,7 +266,14 @@ export class SkillsAnalysisService {
       .filter(gap => gap.priority === 'high')
       .sort((a, b) => this.getSkillImportanceScore(a.skill) - this.getSkillImportanceScore(b.skill));
 
-    const weeklyPlan = [];
+    const weeklyPlan: Array<{
+      week: number;
+      focus: string;
+      skills: string[];
+      estimatedHours: number;
+      resources: LearningResource[];
+      milestones: string[];
+    }> = [];
     let currentWeek = 1;
 
     // Phase 1: Critical skills (first 4-6 weeks)
@@ -461,8 +468,20 @@ export class SkillsAnalysisService {
     });
   }
 
-  private static identifySkillGaps(currentSkills: any[], requiredSkills: any[]) {
-    const gaps = [];
+  private static identifySkillGaps(currentSkills: any[], requiredSkills: any[]): Array<{
+    skill: string;
+    currentLevel: string;
+    requiredLevel: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    recommendations: PersonalizedRecommendation[];
+  }> {
+    const gaps: Array<{
+      skill: string;
+      currentLevel: string;
+      requiredLevel: string;
+      priority: 'low' | 'medium' | 'high' | 'critical';
+      recommendations: PersonalizedRecommendation[];
+    }> = [];
 
     requiredSkills.forEach(required => {
       const current = currentSkills.find(s => 
@@ -495,7 +514,7 @@ export class SkillsAnalysisService {
   }
 
   private static identifyStrengths(currentSkills: any[], requiredSkills: any[]): string[] {
-    const strengths = [];
+    const strengths: string[] = [];
 
     currentSkills.forEach(current => {
       const required = requiredSkills.find(r => 

@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import DomainSelection from "./domain-selection";
 import AdaptiveAssessment from "./adaptive-assessment";
 import CareerRoadmap from "./career-roadmap";
 
 interface UserProfile {
-  selectedDomain: string;
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  domain: string;
   educationLevel: string;
   experience: string;
+  skillLevel: string;
   interests: string[];
   goals: string[];
 }
@@ -23,6 +23,7 @@ interface AssessmentResult {
   recommendedLevel: string;
   strengthAreas: string[];
   improvementAreas: string[];
+  detailedAnalysis: string;
 }
 
 type FlowStage = 'domain-selection' | 'assessment' | 'roadmap';
@@ -32,8 +33,14 @@ export default function AICareerPlatform() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
 
-  const handleDomainSelected = (profile: UserProfile) => {
-    setUserProfile(profile);
+  const handleDomainSelected = (profile: any) => {
+    // Add default name and email for assessment compatibility
+    const completeProfile: UserProfile = {
+      name: 'User',
+      email: 'user@example.com',
+      ...profile
+    };
+    setUserProfile(completeProfile);
     setCurrentStage('assessment');
   };
 
@@ -49,19 +56,21 @@ export default function AICareerPlatform() {
   };
 
   return (
-    <div className="min-h-screen">
-      <AnimatePresence mode="wait">
-        {currentStage === 'domain-selection' && (
-          <motion.div
-            key="domain-selection"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.5 }}
-          >
-            <DomainSelection onDomainSelected={handleDomainSelected} />
-          </motion.div>
-        )}
+    <div className="min-h-screen bg-black relative">
+      {/* Ensure dark background consistency */}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait">
+          {currentStage === 'domain-selection' && (
+            <motion.div
+              key="domain-selection"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.3 }}
+            >
+              <DomainSelection onDomainSelected={handleDomainSelected} />
+            </motion.div>
+          )}
 
         {currentStage === 'assessment' && userProfile && (
           <motion.div
@@ -69,42 +78,38 @@ export default function AICareerPlatform() {
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
+            className="min-h-screen flex items-center justify-center p-6"
           >
             <AdaptiveAssessment 
-              userProfile={userProfile}
-              onComplete={handleAssessmentComplete}
+              userProfile={{
+                selectedDomain: userProfile!.domain,
+                domain: userProfile!.domain,
+                skillLevel: userProfile!.skillLevel,
+                educationLevel: userProfile!.educationLevel,
+                experience: userProfile!.experience,
+                interests: userProfile!.interests,
+                goals: userProfile!.goals
+              }} 
+              onComplete={handleAssessmentComplete} 
             />
           </motion.div>
-        )}
-
-        {currentStage === 'roadmap' && userProfile && assessmentResult && (
-          <motion.div
-            key="roadmap"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.5 }}
-          >
-            <CareerRoadmap 
-              userProfile={userProfile}
-              assessmentResult={assessmentResult}
-            />
-            
-            {/* Restart Button */}
-            <div className="fixed bottom-8 right-8">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleRestart}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow"
-              >
-                Start New Assessment
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        )}          {currentStage === 'roadmap' && userProfile && assessmentResult && (
+            <motion.div
+              key="roadmap"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CareerRoadmap 
+                userProfile={userProfile!} 
+                assessmentResult={assessmentResult!}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

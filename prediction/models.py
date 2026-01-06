@@ -60,17 +60,17 @@ class LearningResource(models.Model):
         ('book', 'Book'),
         ('practice', 'Practice')
     ])
-    provider = models.CharField(max_length=100)
-    duration = models.CharField(max_length=50, blank=True)
+    provider = models.CharField(max_length=100, default='Unknown')
+    duration = models.CharField(max_length=50, blank=True, default='')
     difficulty = models.CharField(max_length=20, choices=[
         ('beginner', 'Beginner'),
         ('intermediate', 'Intermediate'),
         ('advanced', 'Advanced')
-    ])
+    ], default='beginner')
     rating = models.FloatField(null=True, blank=True)
     is_premium = models.BooleanField(default=False)
     points = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.title

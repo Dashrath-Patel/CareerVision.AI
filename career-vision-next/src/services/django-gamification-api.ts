@@ -153,8 +153,8 @@ class DjangoGamificationAPI {
   async batchUpdateProgress(userId: string, progressUpdates: Array<{
     type: 'stage_completed' | 'skill_practiced' | 'resource_completed';
     [key: string]: any;
-  }>): Promise<ProgressUpdateResponse[]> {
-    const results = [];
+  }>): Promise<Array<ProgressUpdateResponse | { error: string }>> {
+    const results: Array<ProgressUpdateResponse | { error: string }> = [];
     
     for (const update of progressUpdates) {
       try {
@@ -162,7 +162,7 @@ class DjangoGamificationAPI {
         results.push(result);
       } catch (error) {
         console.error('Batch update failed for:', update, error);
-        results.push({ error: error.message });
+        results.push({ error: error instanceof Error ? error.message : String(error) });
       }
     }
     
@@ -231,8 +231,8 @@ class DjangoGamificationAPI {
         improvement: skill.progress,
       })) || [],
       streakData: {
-        current: progress.streak?.current_streak || 0,
-        best: progress.streak?.longest_streak || 0,
+        current: progress.streak?.currentStreak || 0,
+        best: progress.streak?.longestStreak || 0,
         weeklyActive: 7, // Placeholder - would calculate from activity logs
       },
     };

@@ -19,11 +19,9 @@ export default function Navigation() {
 
   const navItems = [
     { name: "Home", link: "/" },
-    { name: "Features", link: "/features" },
     { name: "Predict", link: "/predict" },
     { name: "Skills", link: "/skills" },
     { name: "Roadmaps", link: "/roadmaps" },
-    { name: "About", link: "/about" },
   ];
 
   const handleItemClick = () => {
